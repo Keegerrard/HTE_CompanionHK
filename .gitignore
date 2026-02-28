@@ -1,0 +1,205 @@
+# ==============================================================================
+# macOS
+# ==============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Icon?
+.AppleDouble
+.LSOverride
+.DocumentRevisions-V100
+.fseventsd
+.TemporaryItems
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# ==============================================================================
+# Windows
+# ==============================================================================
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# ==============================================================================
+# Node / Next.js / TypeScript
+# ==============================================================================
+node_modules/
+.next/
+out/
+build/
+dist/
+.turbo/
+
+# Next.js cache and telemetry
+.next/cache/
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+
+# Package manager locks (keep only one — remove the ones you don't use)
+# Uncomment the lock files you do NOT use:
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ==============================================================================
+# Python / FastAPI
+# ==============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# Distribution / packaging
+*.egg
+*.egg-info/
+dist/
+build/
+wheels/
+*.whl
+MANIFEST
+.eggs/
+lib/
+lib64/
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.log
+
+# mypy / type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Ruff / linter caches
+.ruff_cache/
+
+# ==============================================================================
+# Database and data services
+# ==============================================================================
+# PostgreSQL dumps / backups
+*.sql.gz
+*.dump
+
+# Redis snapshots
+dump.rdb
+appendonly.aof
+
+# Local DB data volumes (Docker)
+postgres_data/
+redis_data/
+
+# ==============================================================================
+# Docker
+# ==============================================================================
+docker-compose.override.yml
+.docker/
+
+# ==============================================================================
+# AWS / Cloud credentials and artifacts
+# ==============================================================================
+.aws/credentials
+.aws/config
+*.pem
+*.p12
+*.pfx
+cdk.out/
+.cdk.staging/
+samconfig.toml
+.aws-sam/
+
+# ==============================================================================
+# Provider secrets and API keys
+# ==============================================================================
+# Never commit API keys — use environment variables
+secrets/
+*.secret
+api_keys.json
+credentials.json
+
+# ==============================================================================
+# IDE and editor
+# ==============================================================================
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+!.vscode/extensions.json.example
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Cursor IDE
+.cursor/
+
+# ==============================================================================
+# Logs and runtime artifacts
+# ==============================================================================
+logs/
+*.log
+*.pid
+*.seed
+*.pid.lock
+pids/
+
+# ==============================================================================
+# Testing and coverage
+# ==============================================================================
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# ==============================================================================
+# Miscellaneous
+# ==============================================================================
+*.orig
+*.bak
+*.tmp
+.cache/
+tmp/
+temp/
