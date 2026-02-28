@@ -136,7 +136,9 @@ describe("ChatShell", () => {
     expect(await screen.findByText("Companion space reply.")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Local Guide/i }));
-    expect(screen.queryByText("Companion space reply.")).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText("Companion space reply.")).not.toBeInTheDocument();
+    });
 
     fireEvent.change(screen.getByLabelText("Message input"), {
       target: { value: "Plan a quick evening route." },
@@ -146,6 +148,8 @@ describe("ChatShell", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Companion/i }));
     expect(await screen.findByText("Companion space reply.")).toBeInTheDocument();
-    expect(screen.queryByText("Local guide space reply.")).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText("Local guide space reply.")).not.toBeInTheDocument();
+    });
   });
 });
