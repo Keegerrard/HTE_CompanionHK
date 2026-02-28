@@ -1,6 +1,8 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { HandHeart, Phone, X } from "lucide-react";
+import { fadeSlideDown, springGentle } from "@/lib/motion-config";
 
 const CRISIS_RESOURCES = [
   { name: "The Samaritans Hong Kong", number: "2896 0000" },
@@ -15,9 +17,15 @@ interface SafetyBannerProps {
 
 export function SafetyBanner({ onDismiss }: SafetyBannerProps) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-safety-border bg-safety-bg shadow-(--shadow-warm-md)">
+    <motion.div
+      variants={fadeSlideDown}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      transition={springGentle}
+      className="relative overflow-hidden rounded-2xl border border-safety-border bg-safety-bg shadow-(--shadow-warm-md)"
+    >
       <div className="flex flex-col gap-3 px-5 py-4">
-        {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <div className="flex size-9 items-center justify-center rounded-full bg-safety-border/20">
@@ -41,12 +49,14 @@ export function SafetyBanner({ onDismiss }: SafetyBannerProps) {
           )}
         </div>
 
-        {/* Resources */}
         <div className="grid gap-2 sm:grid-cols-2">
-          {CRISIS_RESOURCES.map((res) => (
-            <a
+          {CRISIS_RESOURCES.map((res, i) => (
+            <motion.a
               key={res.number}
               href={`tel:${res.number.replace(/\s/g, "")}`}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + i * 0.05, ...springGentle }}
               className="flex items-center gap-2.5 rounded-xl bg-safety-border/10 px-3 py-2.5 transition-colors hover:bg-safety-border/20"
             >
               <Phone className="size-4 shrink-0 text-safety-text/60" />
@@ -54,10 +64,10 @@ export function SafetyBanner({ onDismiss }: SafetyBannerProps) {
                 <p className="truncate text-xs font-medium text-safety-text/80">{res.name}</p>
                 <p className="text-sm font-bold font-heading text-safety-text">{res.number}</p>
               </div>
-            </a>
+            </motion.a>
           ))}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
