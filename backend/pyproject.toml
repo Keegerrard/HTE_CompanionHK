@@ -9,10 +9,13 @@ description = "CompanionHK FastAPI orchestration service"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+  "alembic",
   "fastapi",
+  "pgvector",
   "pydantic-settings",
   "psycopg[binary]",
   "redis",
+  "sqlalchemy",
   "uvicorn[standard]",
 ]
 

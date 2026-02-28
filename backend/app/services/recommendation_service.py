@@ -1,8 +1,21 @@
+import logging
 import math
+from hashlib import sha256
 from uuid import uuid4
 
+from app.core.database import SessionLocal
 from app.core.settings import settings
+from app.models.enums import (
+    AuditEventType,
+    ProviderEventScope,
+    ProviderEventStatus,
+    RoleType,
+    TravelMode,
+)
 from app.providers.router import ProviderRouter
+from app.repositories.audit_repository import AuditRepository
+from app.repositories.recommendation_repository import RecommendationRepository
+from app.repositories.user_repository import UserRepository
 from app.schemas.recommendations import (
     Coordinates,
     RecommendationContext,
@@ -18,6 +31,7 @@ _INDOOR_PLACE_TYPES = {"cafe", "restaurant",
                        "museum", "shopping_mall", "library"}
 _FALLBACK_DISCOVERY_QUERIES = ["cafe", "park", "museum", "restaurant"]
 _WEATHER_INDOOR_CONDITIONS = {"rain", "drizzle", "thunderstorm", "snow"}
+logger = logging.getLogger(__name__)
 
 
 def _tokenize(text: str) -> set[str]:
@@ -34,9 +48,118 @@ class RecommendationService:
         provider_router: ProviderRouter | None = None,
         weather_service: WeatherService | None = None
     ):
+        self._settings = settings
         self._provider_router = provider_router or ProviderRouter(settings)
         self._weather_service = weather_service or WeatherService(
             self._provider_router)
+
+    def _coarse_user_location(self, *, latitude: float, longitude: float) -> tuple[str, str]:
+        region = f"{latitude:.2f},{longitude:.2f}"
+        token_length = max(
+            6,
+            min(24, self._settings.recommendation_user_location_geohash_precision * 2),
+        )
+        geohash_token = sha256(region.encode(
+            "utf-8")).hexdigest()[:token_length]
+        return geohash_token, region
+
+    def _persist_recommendation_result(
+        self,
+        *,
+        request: RecommendationRequest,
+        response: RecommendationResponse,
+        maps_provider_name: str,
+        weather_provider_name: str,
+    ) -> None:
+        role_enum = RoleType(request.role)
+        travel_mode = TravelMode(request.travel_mode)
+
+        if self._settings.privacy_store_precise_user_location:
+            user_location_region = f"{request.latitude:.6f},{request.longitude:.6f}"
+            user_location_geohash = user_location_region
+        else:
+            user_location_geohash, user_location_region = self._coarse_user_location(
+                latitude=request.latitude,
+                longitude=request.longitude,
+            )
+
+        recommendation_status = (
+            ProviderEventStatus.degraded
+            if response.context.degraded
+            else ProviderEventStatus.success
+        )
+        if (
+            response.context.fallback_reason
+            and "disabled_or_unavailable" in response.context.fallback_reason
+        ):
+            recommendation_status = ProviderEventStatus.fallback
+
+        with SessionLocal() as session:
+            user_repository = UserRepository(session)
+            recommendation_repository = RecommendationRepository(session)
+            audit_repository = AuditRepository(session)
+
+            user_repository.ensure_user(request.user_id)
+            recommendation_request = recommendation_repository.create_request(
+                request_id=response.request_id,
+                user_id=request.user_id,
+                role=role_enum,
+                query=request.query,
+                max_results=request.max_results,
+                preference_tags=request.preference_tags,
+                travel_mode=travel_mode,
+                user_location_geohash=user_location_geohash,
+                user_location_region=user_location_region,
+                context=response.context,
+            )
+            recommendation_repository.create_items(
+                request_pk=recommendation_request.id,
+                recommendations=response.recommendations,
+            )
+
+            audit_repository.create_provider_event(
+                user_id=request.user_id,
+                request_id=response.request_id,
+                role=role_enum,
+                scope=ProviderEventScope.maps,
+                provider_name=maps_provider_name,
+                runtime=None,
+                status=recommendation_status,
+                fallback_reason=response.context.fallback_reason,
+                metadata_json={"result_count": len(response.recommendations)},
+            )
+            weather_status = (
+                ProviderEventStatus.degraded
+                if response.context.degraded and weather_provider_name == "stub"
+                else ProviderEventStatus.success
+            )
+            audit_repository.create_provider_event(
+                user_id=request.user_id,
+                request_id=response.request_id,
+                role=role_enum,
+                scope=ProviderEventScope.weather,
+                provider_name=weather_provider_name,
+                runtime=None,
+                status=weather_status,
+                fallback_reason=response.context.fallback_reason,
+                metadata_json={
+                    "weather_condition": response.context.weather_condition,
+                    "temperature_c": response.context.temperature_c,
+                },
+            )
+            audit_repository.create_audit_event(
+                event_type=AuditEventType.recommendation_request,
+                user_id=request.user_id,
+                request_id=response.request_id,
+                role=role_enum,
+                message="Recommendation request persisted",
+                metadata_json={
+                    "result_count": len(response.recommendations),
+                    "degraded": response.context.degraded,
+                    "user_location_region": user_location_region,
+                },
+            )
+            session.commit()
 
     def _build_search_queries(self, query: str) -> list[str]:
         queries = [query.strip()]
@@ -322,7 +445,7 @@ class RecommendationService:
                 query=request.query
             )[:max_results]
 
-        return RecommendationResponse(
+        response = RecommendationResponse(
             request_id=str(uuid4()),
             recommendations=recommendations,
             context=RecommendationContext(
@@ -332,3 +455,18 @@ class RecommendationService:
                 fallback_reason=fallback_reason
             )
         )
+        try:
+            self._persist_recommendation_result(
+                request=request,
+                response=response,
+                maps_provider_name=maps_provider.provider_name,
+                weather_provider_name=weather_response.weather.source,
+            )
+        except Exception:
+            logger.exception(
+                "recommendation_persistence_failed request_id=%s user_id=%s role=%s",
+                response.request_id,
+                request.user_id,
+                request.role,
+            )
+        return response

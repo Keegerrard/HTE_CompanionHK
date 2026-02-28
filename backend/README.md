@@ -11,11 +11,35 @@ Current framework notes:
 - Long-term memory strategy is controlled by:
   - `MEMORY_LONG_TERM_STRATEGY` (default: `hybrid_profile_retrieval`)
   - `MEMORY_RETRIEVAL_TOP_K`
+- Persistence stack:
+  - `SQLAlchemy 2.x` models + `Alembic` migrations,
+  - `PostgreSQL` + `pgvector` for long-term memory and retrieval,
+  - `Redis` for short-term role-scoped context windows.
 
 Role contract:
 
 - `role` values: `companion`, `local_guide`, `study_guide`
 - thread continuity is scoped by (`user_id`, `role`, `thread_id`)
+
+## Database Migrations
+
+Run these commands from `backend/`:
+
+- Create a migration:
+  - `uv run alembic revision -m "describe change"`
+- Apply latest schema:
+  - `uv run alembic upgrade head`
+- Roll back one migration:
+  - `uv run alembic downgrade -1`
+
+Initial schema migration is in `alembic/versions/8f327fc4442f_create_initial_schema.py`.
+Detailed schema documentation: `../docs/architecture/database-schema.md`.
+
+## Privacy Defaults
+
+- Recommendation persistence does not store precise user current location by default.
+- Coarse location metadata is stored for analytics/debugging (`user_location_geohash`, `user_location_region`).
+- Precise recommended-place coordinates are stored for map and route UX.
 
 ## Local Commands
 

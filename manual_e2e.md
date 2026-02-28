@@ -56,7 +56,25 @@ docker compose -f infra/docker-compose.yml ps
 
 Expected: both `companionhk-postgres` and `companionhk-redis` show as running/healthy.
 
-## 4) Install Dependencies
+## 4) Apply Database Migrations
+
+From repo root:
+
+```bash
+cd backend
+uv run alembic upgrade head
+cd ..
+```
+
+If you use `venv`/`conda`, activate that backend environment first and run:
+
+```bash
+cd backend
+alembic upgrade head
+cd ..
+```
+
+## 5) Install Dependencies
 
 ### Backend (choose one)
 
@@ -94,7 +112,7 @@ npm install
 cd ..
 ```
 
-## 5) Run Automated Tests (Pre-E2E Gate)
+## 6) Run Automated Tests (Pre-E2E Gate)
 
 Backend:
 
@@ -110,7 +128,7 @@ cd frontend && npm run test
 
 If tests fail, fix them before manual E2E.
 
-## 6) Run App Locally (Production-Like Preview)
+## 7) Run App Locally (Production-Like Preview)
 
 Open two terminals.
 
@@ -142,7 +160,7 @@ Expected:
 - `/` returns `{"status":"ok"}`
 - `/health` returns healthy status payload
 
-## 7) Manual E2E Checklist
+## 8) Manual E2E Checklist
 
 Use the UI at `http://localhost:3000`.
 
@@ -217,7 +235,7 @@ Expected:
 - Map renders markers for recommended places.
 - Recommendation links open the corresponding place in Google Maps.
 
-## 8) Shutdown and Cleanup
+## 9) Shutdown and Cleanup
 
 Stop app servers with `Ctrl+C`, then:
 
@@ -231,7 +249,7 @@ To remove local volumes too:
 docker compose -f infra/docker-compose.yml down -v
 ```
 
-## 9) Definition of Done Before Deploy
+## 10) Definition of Done Before Deploy
 
 - Automated tests pass (`pytest -q`, `npm run test`).
 - Manual checklist A-D passes.
