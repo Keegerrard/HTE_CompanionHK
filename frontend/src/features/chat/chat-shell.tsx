@@ -1,6 +1,6 @@
 "use client";
 
-import { SyntheticEvent, useRef, useState } from "react";
+import { SyntheticEvent, useEffect, useRef, useState } from "react";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -11,7 +11,11 @@ import Tabs from "@mui/material/Tabs";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type { Role } from "@/features/chat/types";
+import { MapCanvas } from "@/features/recommendations/map-canvas";
+import { RecommendationList } from "@/features/recommendations/recommendation-list";
+import type { RecommendationResponse } from "@/features/recommendations/types";
 import { postChatMessage } from "@/lib/api/chat";
+import { postRecommendations } from "@/lib/api/recommendations";
 
 type ChatMessage = {
   id: string;
@@ -39,6 +43,61 @@ const ROLE_EMPTY_STATE: Record<Role, string> = {
   study_guide: "Share what you want to study and your timeline.",
 };
 
+const HONG_KONG_FALLBACK_COORDINATES = {
+  latitude: 22.3193,
+  longitude: 114.1694,
+};
+const GOOGLE_MAPS_BROWSER_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+type Coordinates = {
+  latitude: number;
+  longitude: number;
+};
+
+function getBrowserCoordinates(timeoutMs = 2500): Promise<Coordinates | null> {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve(null);
+      return;
+    }
+
+    let settled = false;
+    const timer = window.setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        resolve(null);
+      }
+    }, timeoutMs);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        window.clearTimeout(timer);
+        resolve({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+      },
+      () => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        window.clearTimeout(timer);
+        resolve(null);
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: timeoutMs,
+        maximumAge: 5 * 60 * 1000,
+      },
+    );
+  });
+}
+
 function buildInitialThreadMap(userId: string): Record<Role, string> {
   return {
     companion: `${userId}-companion-thread`,
@@ -64,7 +123,32 @@ export function ChatShell() {
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [coordinates, setCoordinates] = useState<Coordinates | null>(null);
+  const [recommendationResponse, setRecommendationResponse] =
+    useState<RecommendationResponse | null>(null);
+  const [recommendationError, setRecommendationError] = useState<string | null>(null);
+  const [isRecommendationLoading, setIsRecommendationLoading] = useState(false);
   const activeMessages = messagesByRole[activeRole];
+  const activeRecommendations = recommendationResponse?.recommendations ?? [];
+  const recommendationCenter =
+    activeRecommendations[0]?.location ?? coordinates ?? HONG_KONG_FALLBACK_COORDINATES;
+
+  useEffect(() => {
+    let active = true;
+
+    async function resolveCoordinates() {
+      const browserCoordinates = await getBrowserCoordinates();
+      if (!active) {
+        return;
+      }
+      setCoordinates(browserCoordinates ?? HONG_KONG_FALLBACK_COORDINATES);
+    }
+
+    void resolveCoordinates();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleRoleChange = (_event: SyntheticEvent, nextRole: Role) => {
     setActiveRole(nextRole);
@@ -90,6 +174,21 @@ export function ChatShell() {
       [roleAtSend]: [...previous[roleAtSend], userMessage],
     }));
     setIsSubmitting(true);
+    let recommendationPromise: Promise<RecommendationResponse> | null = null;
+    if (roleAtSend === "local_guide") {
+      setRecommendationError(null);
+      setIsRecommendationLoading(true);
+      const requestCoordinates = coordinates ?? HONG_KONG_FALLBACK_COORDINATES;
+      recommendationPromise = postRecommendations({
+        user_id: userId,
+        role: roleAtSend,
+        query: trimmed,
+        latitude: requestCoordinates.latitude,
+        longitude: requestCoordinates.longitude,
+        max_results: 5,
+        travel_mode: "walking",
+      });
+    }
 
     try {
       const response = await postChatMessage({
@@ -111,6 +210,22 @@ export function ChatShell() {
       setError(chatError instanceof Error ? chatError.message : "Unable to send message.");
     } finally {
       setIsSubmitting(false);
+    }
+
+    if (recommendationPromise) {
+      try {
+        const recommendationPayload = await recommendationPromise;
+        setRecommendationResponse(recommendationPayload);
+      } catch (recommendationRequestError) {
+        setRecommendationResponse(null);
+        setRecommendationError(
+          recommendationRequestError instanceof Error
+            ? recommendationRequestError.message
+            : "Unable to load local recommendations.",
+        );
+      } finally {
+        setIsRecommendationLoading(false);
+      }
     }
   };
 
@@ -167,6 +282,45 @@ export function ChatShell() {
           </Box>
         ))}
       </Paper>
+
+      {activeRole === "local_guide" && (
+        <Stack spacing={1.5}>
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            Live Local Guide Context
+          </Typography>
+          {recommendationResponse && (
+            <Typography sx={{ color: "text.secondary" }}>
+              Weather context: {recommendationResponse.context.weather_condition}
+              {recommendationResponse.context.temperature_c !== null
+                ? ` (${recommendationResponse.context.temperature_c.toFixed(1)} deg C)`
+                : ""}
+            </Typography>
+          )}
+          {recommendationError && <Alert severity="warning">{recommendationError}</Alert>}
+          {isRecommendationLoading && (
+            <Typography sx={{ color: "text.secondary" }}>
+              Fetching local recommendations...
+            </Typography>
+          )}
+          {!isRecommendationLoading &&
+            !recommendationError &&
+            activeRecommendations.length === 0 && (
+              <Typography sx={{ color: "text.secondary" }}>
+                Send a Local Guide message to see ranked nearby places and map markers.
+              </Typography>
+            )}
+          {activeRecommendations.length > 0 && (
+            <>
+              <MapCanvas
+                apiKey={GOOGLE_MAPS_BROWSER_API_KEY}
+                center={recommendationCenter}
+                recommendations={activeRecommendations}
+              />
+              <RecommendationList recommendations={activeRecommendations} />
+            </>
+          )}
+        </Stack>
+      )}
 
       <Stack direction="row" spacing={1}>
         <TextField

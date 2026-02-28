@@ -46,3 +46,9 @@ The foundation slice includes:
 - adapter-first provider skeletons,
 - local Postgres/Redis baseline,
 - smoke tests for frontend and backend contracts.
+
+## Integration Contracts
+
+- Weather API usage: `docs/integrations/open-meteo.md`
+- Google Maps API usage: `docs/integrations/google-maps.md`
+- Recommendation and weather app contract: `docs/architecture/recommendation-contract.md`

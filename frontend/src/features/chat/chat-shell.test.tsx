@@ -2,14 +2,28 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChatShell } from "@/features/chat/chat-shell";
 import * as chatApi from "@/lib/api/chat";
+import * as recommendationApi from "@/lib/api/recommendations";
 
 vi.mock("@/lib/api/chat", () => ({
   postChatMessage: vi.fn(),
+}));
+vi.mock("@/lib/api/recommendations", () => ({
+  postRecommendations: vi.fn(),
 }));
 
 describe("ChatShell", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(recommendationApi.postRecommendations).mockResolvedValue({
+      request_id: "recommendation-request",
+      recommendations: [],
+      context: {
+        weather_condition: "unknown",
+        temperature_c: null,
+        degraded: false,
+        fallback_reason: null,
+      },
+    });
   });
 
   it("submits a message and renders the assistant response", async () => {
@@ -69,6 +83,17 @@ describe("ChatShell", () => {
         role: "local_guide",
         thread_id: "demo-user-local_guide-thread",
         message: "I want a half-day walk plan.",
+      });
+    });
+    await waitFor(() => {
+      expect(recommendationApi.postRecommendations).toHaveBeenCalledWith({
+        user_id: "demo-user",
+        role: "local_guide",
+        query: "I want a half-day walk plan.",
+        latitude: 22.3193,
+        longitude: 114.1694,
+        max_results: 5,
+        travel_mode: "walking",
       });
     });
   });

@@ -82,6 +82,12 @@ Memory strategy:
 - Context inputs: emotion state + user preferences + location/weather.
 - Optional freshness boost: `Exa` retrieval.
 
+Integration references:
+
+- `docs/integrations/open-meteo.md`
+- `docs/integrations/google-maps.md`
+- `docs/architecture/recommendation-contract.md`
+
 ## Infrastructure Layer (AWS-First)
 
 - Frontend hosting: `AWS Amplify`
