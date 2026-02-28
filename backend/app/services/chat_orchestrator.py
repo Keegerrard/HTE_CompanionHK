@@ -10,7 +10,7 @@ from app.core.redis_client import (
     serialize_json,
 )
 from app.core.settings import settings
-from app.memory.embeddings import DeterministicEmbeddingProvider
+from app.memory.embeddings import build_embedding_provider
 from app.memory.context_builder import ConversationContextBuilder
 from app.models.enums import (
     AuditEventType,
@@ -44,8 +44,11 @@ class ChatOrchestrator:
         self._settings = settings
         self._provider_router = provider_router or ProviderRouter(settings)
         self._runtime = runtime or build_runtime(settings)
-        self._embedding_provider = DeterministicEmbeddingProvider(
-            settings.memory_embedding_dimensions
+        self._embedding_provider = build_embedding_provider(
+            api_key=settings.minimax_api_key,
+            model=settings.memory_embedding_model,
+            base_url=settings.minimax_base_url,
+            dimensions=settings.memory_embedding_dimensions,
         )
         self._context_builder = context_builder or ConversationContextBuilder(
             settings)
@@ -232,12 +235,24 @@ class ChatOrchestrator:
             chat_request.user_id
         )
 
+        from app.services.safety_service import assess_safety
+
+        assessment = assess_safety(chat_request.message)
+        if assessment.risk_level == "high":
+            context["safety_context"] = {
+                "risk_level": assessment.risk_level,
+                "crisis_resources": assessment.crisis_resources,
+            }
+
         reply = self._runtime.generate_reply(
             message=chat_request.message,
             provider=provider,
             context=context
         )
-        safety = SafetyResult(risk_level="low", show_crisis_banner=False)
+        safety = SafetyResult(
+            risk_level=assessment.risk_level,
+            show_crisis_banner=assessment.show_crisis_banner,
+        )
 
         try:
             self._persist_chat_turn(

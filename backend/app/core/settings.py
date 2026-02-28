@@ -39,6 +39,7 @@ class Settings(BaseSettings):
         default=False, alias="FEATURE_CANTONESEAI_ENABLED")
     feature_exa_enabled: bool = Field(
         default=False, alias="FEATURE_EXA_ENABLED")
+    exa_api_key: str = Field(default="", alias="EXA_API_KEY")
     feature_aws_enabled: bool = Field(
         default=True, alias="FEATURE_AWS_ENABLED")
     feature_weather_enabled: bool = Field(
