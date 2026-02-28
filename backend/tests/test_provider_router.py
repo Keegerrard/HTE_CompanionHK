@@ -12,12 +12,25 @@ def test_provider_router_falls_back_to_mock_when_minimax_disabled() -> None:
 
 
 def test_provider_router_uses_minimax_when_enabled() -> None:
-    settings = Settings(CHAT_PROVIDER="minimax", FEATURE_MINIMAX_ENABLED=True)
+    settings = Settings(
+        CHAT_PROVIDER="minimax",
+        FEATURE_MINIMAX_ENABLED=True,
+        MINIMAX_API_KEY="test-minimax-key",
+    )
     router = ProviderRouter(settings)
 
     provider = router.resolve_chat_provider()
 
     assert provider.provider_name == "minimax"
+
+
+def test_provider_router_falls_back_to_mock_when_minimax_key_missing() -> None:
+    settings = Settings(CHAT_PROVIDER="minimax", FEATURE_MINIMAX_ENABLED=True)
+    router = ProviderRouter(settings)
+
+    provider = router.resolve_chat_provider()
+
+    assert provider.provider_name == "mock"
 
 
 def test_provider_router_uses_open_meteo_when_weather_enabled() -> None:

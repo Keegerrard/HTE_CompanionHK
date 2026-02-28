@@ -19,3 +19,4 @@ def test_runtime_factory_uses_langgraph_when_flag_enabled() -> None:
     runtime = build_runtime(settings)
 
     assert runtime.runtime_name == "langgraph"
+    assert getattr(runtime, "checkpointer_backend") == "memory"

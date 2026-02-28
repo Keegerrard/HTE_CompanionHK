@@ -28,6 +28,11 @@ class Settings(BaseSettings):
 
     feature_minimax_enabled: bool = Field(
         default=False, alias="FEATURE_MINIMAX_ENABLED")
+    minimax_api_key: str = Field(default="", alias="MINIMAX_API_KEY")
+    minimax_model: str = Field(
+        default="MiniMax-M2.5", alias="MINIMAX_MODEL")
+    minimax_base_url: str = Field(
+        default="https://api.minimax.io/v1", alias="MINIMAX_BASE_URL")
     feature_elevenlabs_enabled: bool = Field(
         default=False, alias="FEATURE_ELEVENLABS_ENABLED")
     feature_cantoneseai_enabled: bool = Field(
