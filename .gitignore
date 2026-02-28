@@ -94,8 +94,9 @@ wheels/
 *.whl
 MANIFEST
 .eggs/
-lib/
-lib64/
+# Keep these anchored so frontend/src/lib remains trackable
+/lib/
+/lib64/
 
 # Testing
 .pytest_cache/
