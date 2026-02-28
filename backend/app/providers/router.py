@@ -11,8 +11,16 @@ class ProviderRouter:
         self._settings = settings
 
     def resolve_chat_provider(self) -> ChatProvider:
-        if self._settings.chat_provider == "minimax" and self._settings.feature_minimax_enabled:
-            return MiniMaxChatProvider()
+        if (
+            self._settings.chat_provider == "minimax"
+            and self._settings.feature_minimax_enabled
+            and self._settings.minimax_api_key
+        ):
+            return MiniMaxChatProvider(
+                api_key=self._settings.minimax_api_key,
+                model=self._settings.minimax_model,
+                base_url=self._settings.minimax_base_url,
+            )
         return MockChatProvider()
 
     def resolve_weather_provider(self) -> WeatherProvider:
