@@ -1,25 +1,33 @@
 import type { Metadata } from "next";
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
+import { Nunito, Nunito_Sans } from "next/font/google";
+import { WeatherProvider } from "@/components/weather-provider";
 import "./globals.css";
-import { CompanionThemeProvider } from "@/theme/theme-provider";
+
+const nunito = Nunito({
+  subsets: ["latin"],
+  variable: "--font-heading",
+  display: "swap",
+  weight: ["400", "600", "700"],
+});
+
+const nunitoSans = Nunito_Sans({
+  subsets: ["latin"],
+  variable: "--font-body",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
 
 export const metadata: Metadata = {
-  title: "CompanionHK",
+  title: "港伴AI — CompanionHK",
   description:
-    "Multi-role AI companion for Hong Kong users: Companion, Local Guide, and Study Guide.",
+    "Your warm AI companion for Hong Kong: emotional support, local guidance, and study help.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${nunito.variable} ${nunitoSans.variable}`}>
       <body>
-        <AppRouterCacheProvider>
-          <CompanionThemeProvider>{children}</CompanionThemeProvider>
-        </AppRouterCacheProvider>
+        <WeatherProvider>{children}</WeatherProvider>
       </body>
     </html>
   );

@@ -1,14 +1,365 @@
-:root {
+@import "tailwindcss";
+
+/* ──────────────────────────────────────────────────────────
+   CompanionHK Design System
+   Weather-adaptive warm palette, role accents, soft shadows
+   ────────────────────────────────────────────────────────── */
+
+@theme inline {
+  --font-heading: "Nunito", sans-serif;
+  --font-body: "Nunito Sans", sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-role-companion: var(--role-companion);
+  --color-role-local-guide: var(--role-local-guide);
+  --color-role-study-guide: var(--role-study-guide);
+
+  --color-safety-bg: var(--safety-bg);
+  --color-safety-border: var(--safety-border);
+  --color-safety-text: var(--safety-text);
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-bubble: 1.25rem;
+
+  --shadow-warm-sm: 0 1px 3px rgba(139, 115, 85, 0.08);
+  --shadow-warm-md: 0 4px 12px rgba(139, 115, 85, 0.1);
+  --shadow-warm-lg: 0 8px 24px rgba(139, 115, 85, 0.12);
+}
+
+/* ──────────────────────────────────────────────────────────
+   Base / Clear Day (default)
+   ────────────────────────────────────────────────────────── */
+
+:root,
+[data-weather="clear-day"],
+[data-weather="unknown"] {
   color-scheme: light;
+
+  --background: #fff8f0;
+  --foreground: #3d3228;
+
+  --card: #fffcf9;
+  --card-foreground: #3d3228;
+
+  --popover: #fffcf9;
+  --popover-foreground: #3d3228;
+
+  --primary: #f4845f;
+  --primary-foreground: #ffffff;
+
+  --secondary: #fff0e6;
+  --secondary-foreground: #6b4226;
+
+  --muted: #f5f0eb;
+  --muted-foreground: #8a7e74;
+
+  --accent: #f5c542;
+  --accent-foreground: #5c4a14;
+
+  --destructive: #e85d5d;
+  --destructive-foreground: #ffffff;
+
+  --border: #e8dfd5;
+  --input: #e8dfd5;
+  --ring: #f4845f;
+
+  --role-companion: #f4845f;
+  --role-local-guide: #6b9f78;
+  --role-study-guide: #7b8cde;
+
+  --safety-bg: #fff5e6;
+  --safety-border: #f5c542;
+  --safety-text: #6b4a1f;
 }
 
-* {
-  box-sizing: border-box;
+/* ──────────────────────────────────────────────────────────
+   Clear Night — cozy evening
+   ────────────────────────────────────────────────────────── */
+
+[data-weather="clear-night"] {
+  color-scheme: dark;
+
+  --background: #1c1928;
+  --foreground: #f0ede8;
+
+  --card: #2a2540;
+  --card-foreground: #f0ede8;
+
+  --popover: #2a2540;
+  --popover-foreground: #f0ede8;
+
+  --primary: #c4b5e0;
+  --primary-foreground: #1c1928;
+
+  --secondary: #352f4a;
+  --secondary-foreground: #d4cce0;
+
+  --muted: #2a2540;
+  --muted-foreground: #9b93a8;
+
+  --accent: #e8a44c;
+  --accent-foreground: #1c1928;
+
+  --destructive: #e85d5d;
+  --destructive-foreground: #ffffff;
+
+  --border: #3d3555;
+  --input: #3d3555;
+  --ring: #c4b5e0;
+
+  --role-companion: #e8a0b0;
+  --role-local-guide: #8fbfa0;
+  --role-study-guide: #a0adee;
+
+  --safety-bg: #352f1a;
+  --safety-border: #e8a44c;
+  --safety-text: #f0e0c0;
 }
 
-html,
-body {
-  margin: 0;
-  min-height: 100%;
-  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+/* ──────────────────────────────────────────────────────────
+   Rain / Drizzle / Thunderstorm — comforting
+   ────────────────────────────────────────────────────────── */
+
+[data-weather="rain"],
+[data-weather="drizzle"],
+[data-weather="thunderstorm"] {
+  color-scheme: light;
+
+  --background: #f0ecf5;
+  --foreground: #3d3247;
+
+  --card: #fdfbff;
+  --card-foreground: #3d3247;
+
+  --popover: #fdfbff;
+  --popover-foreground: #3d3247;
+
+  --primary: #5aa0a5;
+  --primary-foreground: #ffffff;
+
+  --secondary: #ede5f0;
+  --secondary-foreground: #5a4565;
+
+  --muted: #e8e2ee;
+  --muted-foreground: #7a6e85;
+
+  --accent: #d4a0a0;
+  --accent-foreground: #4a2828;
+
+  --destructive: #e85d5d;
+  --destructive-foreground: #ffffff;
+
+  --border: #ddd6e5;
+  --input: #ddd6e5;
+  --ring: #5aa0a5;
+
+  --role-companion: #d4a0a0;
+  --role-local-guide: #6b9f78;
+  --role-study-guide: #7b8cde;
+
+  --safety-bg: #f5f0e0;
+  --safety-border: #d4a070;
+  --safety-text: #5a4530;
+}
+
+/* ──────────────────────────────────────────────────────────
+   Cloudy / Partly Cloudy / Fog — gentle linen
+   ────────────────────────────────────────────────────────── */
+
+[data-weather="cloudy"],
+[data-weather="partly_cloudy"],
+[data-weather="fog"] {
+  color-scheme: light;
+
+  --background: #f5f0eb;
+  --foreground: #3d3636;
+
+  --card: #fffdf9;
+  --card-foreground: #3d3636;
+
+  --popover: #fffdf9;
+  --popover-foreground: #3d3636;
+
+  --primary: #a0887e;
+  --primary-foreground: #ffffff;
+
+  --secondary: #ede8e2;
+  --secondary-foreground: #5a4e48;
+
+  --muted: #e8e2db;
+  --muted-foreground: #8a7e78;
+
+  --accent: #b898a5;
+  --accent-foreground: #3d2830;
+
+  --destructive: #e85d5d;
+  --destructive-foreground: #ffffff;
+
+  --border: #e0d8d0;
+  --input: #e0d8d0;
+  --ring: #a0887e;
+
+  --role-companion: #d4a090;
+  --role-local-guide: #6b9f78;
+  --role-study-guide: #8898c8;
+
+  --safety-bg: #f5ede0;
+  --safety-border: #c8a878;
+  --safety-text: #5a4a38;
+}
+
+/* ──────────────────────────────────────────────────────────
+   Snow — soft winter
+   ────────────────────────────────────────────────────────── */
+
+[data-weather="snow"] {
+  color-scheme: light;
+
+  --background: #f5f2f8;
+  --foreground: #3a3545;
+
+  --card: #fdfcff;
+  --card-foreground: #3a3545;
+
+  --popover: #fdfcff;
+  --popover-foreground: #3a3545;
+
+  --primary: #8b9ad0;
+  --primary-foreground: #ffffff;
+
+  --secondary: #eae5f0;
+  --secondary-foreground: #554d65;
+
+  --muted: #e5e0ea;
+  --muted-foreground: #7e7890;
+
+  --accent: #c4b0d0;
+  --accent-foreground: #3a2d45;
+
+  --destructive: #e85d5d;
+  --destructive-foreground: #ffffff;
+
+  --border: #dbd5e2;
+  --input: #dbd5e2;
+  --ring: #8b9ad0;
+
+  --role-companion: #d0a0b0;
+  --role-local-guide: #7baf8e;
+  --role-study-guide: #8b9ad0;
+
+  --safety-bg: #f0eae0;
+  --safety-border: #c0a880;
+  --safety-text: #554835;
+}
+
+/* ──────────────────────────────────────────────────────────
+   Base layer styles
+   ────────────────────────────────────────────────────────── */
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    border-color: var(--border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    font-family: var(--font-body);
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+/* ──────────────────────────────────────────────────────────
+   Chat bubble animations
+   ────────────────────────────────────────────────────────── */
+
+@keyframes bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-bubble-in {
+  animation: bubble-in 0.2s ease-out both;
+}
+
+@keyframes pulse-gentle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse-gentle {
+  animation: pulse-gentle 2s ease-in-out infinite;
+}
+
+@keyframes typing-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.typing-dot:nth-child(1) {
+  animation: typing-dot 1.2s ease-in-out infinite 0s;
+}
+.typing-dot:nth-child(2) {
+  animation: typing-dot 1.2s ease-in-out infinite 0.2s;
+}
+.typing-dot:nth-child(3) {
+  animation: typing-dot 1.2s ease-in-out infinite 0.4s;
 }

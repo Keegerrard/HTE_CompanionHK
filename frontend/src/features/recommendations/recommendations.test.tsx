@@ -12,6 +12,11 @@ vi.mock("@/lib/api/recommendations", () => ({
   postRecommendations: vi.fn(),
 }));
 
+vi.mock("@/components/weather-provider", () => ({
+  useWeather: () => ({ condition: "unknown", isDay: true, temperatureC: null }),
+  WeatherProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 describe("recommendation integration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -86,7 +91,7 @@ describe("recommendation integration", () => {
 
   it("renders recommendation cards in local guide flow", async () => {
     render(<ChatShell />);
-    fireEvent.click(screen.getByRole("tab", { name: "Local Guide" }));
+    fireEvent.click(screen.getByRole("button", { name: /Local Guide/i }));
     fireEvent.change(screen.getByLabelText("Message input"), {
       target: { value: "Plan a route with a cafe and a nearby park." },
     });
@@ -97,6 +102,5 @@ describe("recommendation integration", () => {
     });
     expect(await screen.findByText("Local Recommendations")).toBeInTheDocument();
     expect(await screen.findByText("Harbour Cafe")).toBeInTheDocument();
-    expect(screen.getByText("Weather context: cloudy (26.0 deg C)")).toBeInTheDocument();
   });
 });

@@ -10,6 +10,10 @@ vi.mock("@/lib/api/chat", () => ({
 vi.mock("@/lib/api/recommendations", () => ({
   postRecommendations: vi.fn(),
 }));
+vi.mock("@/components/weather-provider", () => ({
+  useWeather: () => ({ condition: "unknown", isDay: true, temperatureC: null }),
+  WeatherProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
 
 describe("ChatShell", () => {
   beforeEach(() => {
@@ -71,7 +75,7 @@ describe("ChatShell", () => {
     });
 
     render(<ChatShell />);
-    fireEvent.click(screen.getByRole("tab", { name: "Local Guide" }));
+    fireEvent.click(screen.getByRole("button", { name: /Local Guide/i }));
     fireEvent.change(screen.getByLabelText("Message input"), {
       target: { value: "I want a half-day walk plan." },
     });
@@ -131,7 +135,7 @@ describe("ChatShell", () => {
     fireEvent.click(screen.getByRole("button", { name: "Send" }));
     expect(await screen.findByText("Companion space reply.")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("tab", { name: "Local Guide" }));
+    fireEvent.click(screen.getByRole("button", { name: /Local Guide/i }));
     expect(screen.queryByText("Companion space reply.")).not.toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("Message input"), {
@@ -140,7 +144,7 @@ describe("ChatShell", () => {
     fireEvent.click(screen.getByRole("button", { name: "Send" }));
     expect(await screen.findByText("Local guide space reply.")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("tab", { name: "Companion" }));
+    fireEvent.click(screen.getByRole("button", { name: /Companion/i }));
     expect(await screen.findByText("Companion space reply.")).toBeInTheDocument();
     expect(screen.queryByText("Local guide space reply.")).not.toBeInTheDocument();
   });
